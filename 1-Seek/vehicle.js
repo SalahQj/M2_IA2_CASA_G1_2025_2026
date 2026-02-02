@@ -12,12 +12,17 @@ class Vehicle {
     this.maxForce = 0.1;
     // rayon du véhicule
     this.r = 16;
-    
+    // Rayon de perception pour debug
+    this.perceptionRadius = 200;
   }
 
-  applyBehaviors(target) {
-    let force = this.seek(target);
-    //let force = this.flee(target);
+  applyBehaviors(target, mode = "seek") {
+    let force;
+    if (mode === "flee") {
+      force = this.flee(target);
+    } else {
+      force = this.seek(target);
+    }
     this.applyForce(force);
   }
 
@@ -25,7 +30,7 @@ class Vehicle {
   // la cible passée en paramètre (un vecteur p5.Vector, par exemple la position de 
   // la souris)
   seek(target) {
- 
+
     // on calcule la direction vers la cible : la vitesse DESIREE
     // C'est l'ETAPE 1 (action : se diriger vers une cible)
     let desiredSpeed = p5.Vector.sub(target, this.pos);
@@ -47,8 +52,14 @@ class Vehicle {
 
   // comportement de fuite, inverse de seek
   flee(target) {
-    // inverse de seek !
-    return this.seek(target).mult(-1);
+    // Pour fuir, on veut une vitesse désirée qui s'éloigne de la cible
+    let desiredSpeed = p5.Vector.sub(this.pos, target);
+    desiredSpeed.setMag(this.maxSpeed);
+
+    // Pilotage classique
+    let force = p5.Vector.sub(desiredSpeed, this.vel);
+    force.limit(this.maxForce);
+    return force;
   }
 
   // --------------------------------------------
@@ -101,11 +112,11 @@ class Vehicle {
     // Dessin d'un véhicule sous la forme d'un triangle. Comme s'il était droit, 
     // avec le 0, 0 en haut à gauche
     triangle(-this.r, -this.r / 2, -this.r, this.r / 2, this.r, 0);
-    
+
     // on dessine le cercle de perception
     noFill();
     stroke("rgba(255, 255, 255)");
-    circle(0, 0, this.perceptionRadius*2);
+    circle(0, 0, this.perceptionRadius * 2);
     // restauration du contexte graphique, le 0, 0 redevient le coin en haut à gauche
     // de l'écran, les couleurs et épaisseurs de traits redeviennent celles d'avant
     pop();
@@ -131,7 +142,7 @@ class Vehicle {
 
     pop();
   }
-  
+
   // que fait cette méthode ?
   edges() {
     if (this.pos.x > width + this.r) {
