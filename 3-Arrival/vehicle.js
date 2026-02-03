@@ -9,7 +9,6 @@ class Vehicle {
     this.maxForce = 0.6;
     this.r = 16;
     this.rayonZoneDeFreinage = 100;
-    this.heading = 0;
   }
 
   evade(vehicle) {
@@ -58,7 +57,7 @@ class Vehicle {
         push();
         stroke(255, 255, 255);
         noFill();
-        circle(target.x, target.y, this.rayonZoneDeFreinage * 2);
+        circle(target.x, target.y, this.rayonZoneDeFreinage);
         pop();
       }
 
@@ -70,13 +69,7 @@ class Vehicle {
       // si d = rayon alors desiredSpeed = maxSpeed
       // si d = 0 alors desiredSpeed = 0
       if (distance < this.rayonZoneDeFreinage) {
-        // Si on est "derrière" la cible (distance <= d), on s'arrête.
-        if (distance <= d) {
-          valueDesiredSpeed = 0;
-        } else {
-          // On mappe la distance entre d et le rayon pour obtenir une vitesse entre 0 et maxSpeed
-          valueDesiredSpeed = map(distance, d, this.rayonZoneDeFreinage, 0, this.maxSpeed);
-        }
+        valueDesiredSpeed = map(distance, d, this.rayonZoneDeFreinage, 0, this.maxSpeed);
       }
     }
 
@@ -103,36 +96,30 @@ class Vehicle {
     this.acc.set(0, 0);
   }
 
-  show(target = null, angle = null) {
-    if (this.vel.mag() > 0.1) {
-      this.heading = this.vel.heading();
-    } else if (target) {
-      // Point towards target when almost stopped
-      let toTarget = p5.Vector.sub(target, this.pos);
-      this.heading = toTarget.heading();
-    }
-
-    // Override if a specific angle (like alpha from textToPoints) is provided
-    let finalAngle = (angle !== null) ? angle : this.heading;
-
-    push();
-    translate(this.pos.x, this.pos.y);
-    rotate(finalAngle);
+  show() {
 
     stroke(255);
-    strokeWeight(1);
+    strokeWeight(2);
     fill(255);
-    triangle(-this.r, -this.r / 2, -this.r, this.r / 2, this.r, 0);
-    pop();
-  }
-
-  showCircle() {
+    stroke(0);
+    strokeWeight(2);
     push();
     translate(this.pos.x, this.pos.y);
-    fill(255);
-    noStroke();
-    circle(0, 0, this.r);
+    if (this.vel.mag() > 0.2)
+      rotate(this.vel.heading());
+
+    triangle(-this.r, -this.r / 2, -this.r, this.r / 2, this.r, 0);
     pop();
+    /*
+   push();
+   // on dessine le vehicule comme un cercle
+   fill("blue");
+   stroke("white");
+   strokeWeight(2);
+   translate(this.pos.x, this.pos.y);
+   circle(0, 0, this.r * 2);  
+   pop();
+   */
   }
 
   edges() {

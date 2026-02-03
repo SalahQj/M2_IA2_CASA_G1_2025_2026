@@ -10,8 +10,16 @@
   <link rel="stylesheet" type="text/css" href="style.css">
 
   <script src="libraries/p5.min.js"></script>
-  <script src="vehicle.js"></script>
-  <script src="sketch.js"></script>
+  <script src="vehicle.js?v=2"></script>
+  <script src="snake.js?v=2"></script>
+  <script src="sketch.js?v=2"></script>
+  <script>
+    // Fail-safe : Masquer l'écran de chargement après 3 secondes quoi qu'il arrive
+    setTimeout(() => {
+      let loading = document.getElementById('p5_loading');
+      if (loading) loading.style.display = 'none';
+    }, 3000);
+  </script>
 </head>
 
 <body>
