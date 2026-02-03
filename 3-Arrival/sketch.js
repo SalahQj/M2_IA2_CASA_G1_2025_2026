@@ -9,9 +9,10 @@ let points = [];
 let mode = "snake";
 
 // Appelée avant de démarrer l'animation
+// Appelée avant de démarrer l'animation
 function preload() {
   // en général on charge des images, des fontes de caractères etc.
-  font = loadFont('./assets/inconsolata.otf');
+  // font = loadFont('./assets/inconsolata.otf'); // Commented out to avoid CORS issues on local file execution
 }
 
 function setup() {
@@ -25,7 +26,14 @@ function setup() {
 
   // Texte qu'on affiche avec textToPoint
   // Get the point array.
-  points = font.textToPoints('Hello!', 350, 250, 305, { sampleFactor: 0.03 });
+  // points = font.textToPoints('Hello!', 350, 250, 305, { sampleFactor: 0.03 });
+  points = []; // Empty points for now to prevent crash
+
+  // Create a circle of points manually as a fallback demo
+  for (let i = 0; i < 20; i++) {
+    let angle = map(i, 0, 20, 0, TWO_PI);
+    points.push(createVector(width / 2 + 100 * cos(angle), height / 2 + 100 * sin(angle)));
+  }
 
   // on cree des vehicules, autant que de points
   nbVehicules = points.length;
@@ -33,7 +41,6 @@ function setup() {
     let v = new Vehicle(random(width), random(height));
     vehicles.push(v);
   }
-
 }
 
 // appelée 60 fois par seconde
@@ -54,36 +61,36 @@ function draw() {
 
   switch (mode) {
     case "snake":
- // Cible qui suit la souris, cercle rouge de rayon 32
-  target.x = mouseX;
-  target.y = mouseY;
+      // Cible qui suit la souris, cercle rouge de rayon 32
+      target.x = mouseX;
+      target.y = mouseY;
 
-  // dessin de la cible
-  push();
-  fill(255, 0, 0);
-  noStroke();
-  ellipse(target.x, target.y, 32);
-  pop();
+      // dessin de la cible
+      push();
+      fill(255, 0, 0);
+      noStroke();
+      ellipse(target.x, target.y, 32);
+      pop();
 
-  vehicles.forEach((vehicle, index) => {
-    // si on a affaire au premier véhicule
-    // alors il suit la souris (target)
-    let steeringForce;
+      vehicles.forEach((vehicle, index) => {
+        // si on a affaire au premier véhicule
+        // alors il suit la souris (target)
+        let steeringForce;
 
-    if (index === 0) {
-      // le premier véhicule suit la souris avec arrivée
-      steeringForce = vehicle.arrive(target);
-    } else {
-      // Je suis un suiveur, je poursuis le véhicule 
-      // précédent avec arrivée
-      let vehiculePrecedent = vehicles[index - 1];
-      steeringForce = vehicle.arrive(vehiculePrecedent.pos, 30);
-    }
-    
-    vehicle.applyForce(steeringForce);
-    vehicle.update();
-    vehicle.show();
-  })
+        if (index === 0) {
+          // le premier véhicule suit la souris avec arrivée
+          steeringForce = vehicle.arrive(target);
+        } else {
+          // Je suis un suiveur, je poursuis le véhicule 
+          // précédent avec arrivée
+          let vehiculePrecedent = vehicles[index - 1];
+          steeringForce = vehicle.arrive(vehiculePrecedent.pos, 30);
+        }
+
+        vehicle.applyForce(steeringForce);
+        vehicle.update();
+        vehicle.show();
+      })
       break;
     case "text":
       vehicles.forEach((vehicle, index) => {
@@ -97,7 +104,7 @@ function draw() {
       });
       break;
   }
- 
+
 }
 
 

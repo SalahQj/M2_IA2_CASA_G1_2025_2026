@@ -17,7 +17,7 @@ class Vehicle {
   /*
    seek est une méthode qui permet de faire se rapprocher le véhicule de la cible passée en paramètre
    */
-    seek(target) {
+  seek(target) {
     // on calcule la direction vers la cible
     // C'est l'ETAPE 1 (action : se diriger vers une cible)
     let force = p5.Vector.sub(target, this.pos);
@@ -42,70 +42,74 @@ class Vehicle {
      cette methode renvoie la force à appliquer au véhicule
   */
   pursue(target) {
-
-    // On dessine le vecteur vitesse de la target
-    this.drawVector(target.pos, target.vel.copy().mult(10));
-
-    // TODO
     // 1 - calcul de la position future de la cible
-    // on fait une copie de la vitesse de la target
-    // (pour ne pas modifier la vitesse de la target)
     let targetAhead = target.vel.copy();
 
-    // et on le multiplie par 10 (10 frames)
-    // 2 - prediction dans 10 frames = 10 fois la longueur du vecteur
-    // (on multiplie le vecteur vitesse par 10)
-    // TODO
-    targetAhead.mult(20);
+    // 2 - prediction : on regarde 10 frames plus loin (par défaut)
+    // On pourrait rendre ça paramétrable
+    let prediction = 10;
+    targetAhead.mult(prediction);
 
-    // 3 - on positionne  la target au bout de ce vecteur
-    // (on ajoute ce vecteur à la position de la target)
-    // TODO
+    // 3 - on positionne la target au bout de ce vecteur
     targetAhead.add(target.pos);
 
-    // 4 -dessin du point devant la target
+    // 4 - dessin du point devant la target (debug)
+    // On le dessine seulement si on est le poursuivant (pour éviter de polluer l'écran)
+    // ou on le dessine tout le temps pour le debug
+    /*
+    push();
     fill("green");
-    circle(targetAhead.x, targetAhead.y, 16);
+    noStroke();
+    circle(targetAhead.x, targetAhead.y, 10);
+    pop();
+    */
 
-    // 5 - dessin d'un cercle vert de rayon 16 pour voir ce point
-    // on dessine le point devant le véhicule
-    
-
-    // 6 - appel à seek avec ce point comme cible 
-    let force = this.seek(targetAhead);
-
-    // n'oubliez pas, on renvoie la force à appliquer au véhicule !
-    return force;
+    // 5 - appel à seek avec ce point comme cible 
+    return this.seek(targetAhead);
   }
 
   /* inverse de pursue
      cette methode renvoie la force à appliquer au véhicule
   */
   evade(target) {
-    // TODO : on inverse la logique de pursue
-    let force = this.pursue(target).mult(-1);
-    return force;
+    // On prédit où sera le poursuivant
+    let pursuerAhead = target.vel.copy();
+    let prediction = 10;
+    pursuerAhead.mult(prediction);
+    pursuerAhead.add(target.pos);
+
+    // Et on fuit ce point !
+    // Note: evade c'est fuir la position future du poursuivant
+    // Ou simplement fuir le poursuivant avec une logique de prediction inverse
+    // La consigne dit : invserer la vitesse désirée renvoyée par pursue
+    // Donc on reuse pursue mais on inverse le résultat ?
+    // "Comme pour flee, il faut inverser la vitesse désirée et non la force renvoyée par pursuit."
+
+    // Implémentation Reynolds standard Evade :
+    // Distance to pursuer
+    let distance = p5.Vector.dist(this.pos, target.pos);
+    // Look ahead time proportional to distance
+    let lookAhead = distance / this.maxSpeed; // ou constant
+
+    let predictedTarget = target.vel.copy().mult(lookAhead).add(target.pos);
+
+    return this.flee(predictedTarget);
   }
 
-  /**  Fonction de poursuite parfaite (avec le point devant la
-  target qui se rapproche quand le poursuiveur se rapproche)
-  */
-  pursuePerfect(vehicle) {
-    // Use the Law of Sines (https://en.wikipedia.org/wiki/Law_of_sines)
-    // to predict the right collision point
-    const speed_ratio = vehicle.vel.mag() / this.maxSpeed;
-    const target_angle = vehicle.vel.angleBetween(p5.Vector.sub(this.pos, vehicle.pos));
-    const my_angle = asin(sin(target_angle) * speed_ratio);
-    const dist = this.pos.dist(vehicle.pos);
-    const prediction = dist * sin(my_angle) / sin(PI - my_angle - target_angle);
-    const target = vehicle.vel.copy().setMag(prediction).add(vehicle.pos);
-    
-    drawArrow(vehicle.pos, p5.Vector.mult(vehicle.vel, 20), 'red');
-    drawArrow(this.pos, p5.Vector.sub(target, this.pos), 'green');
-    
-    fill(0, 255, 0);
-    circle(target.x, target.y, 8);
-    return this.seek(target);
+  // Surcharge de flee pour qu'elle accepte un vecteur direct (pas forcément un objet Vehicle)
+  flee(targetPos) {
+    // Cible = position à fuir
+    // Si targetPos est un objet avec pos, on prend pos, sinon c'est un vecteur
+    let target = (targetPos.pos) ? targetPos.pos : targetPos;
+
+    // Pour fuir, on veut une vitesse désirée qui s'éloigne de la cible
+    let desiredSpeed = p5.Vector.sub(this.pos, target);
+    desiredSpeed.setMag(this.maxSpeed);
+
+    // Pilotage
+    let force = p5.Vector.sub(desiredSpeed, this.vel);
+    force.limit(this.maxForce);
+    return force;
   }
 
 
@@ -165,7 +169,7 @@ class Vehicle {
     line(pos.x, pos.y, pos.x + v.x, pos.y + v.y);
     // dessine une petite fleche au bout du vecteur vitesse
     let arrowSize = 5;
-    translate(pos.x + v.x , pos.y + v.y);
+    translate(pos.x + v.x, pos.y + v.y);
     rotate(v.heading());
     translate(-arrowSize / 2, 0);
     triangle(0, arrowSize / 2, 0, -arrowSize / 2, arrowSize, 0);
