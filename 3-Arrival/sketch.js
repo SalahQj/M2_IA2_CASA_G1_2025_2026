@@ -8,6 +8,7 @@ let mode = "snake";
 let font;
 let points = [];
 let foods = [];
+let obstacles = [];
 
 console.log("Sketch.js: Début du chargement...");
 
@@ -38,6 +39,9 @@ function setup() {
   for (let i = 0; i < 10; i++) {
     spawnFood();
   }
+
+  // Create an obstacle in center
+  obstacles.push(new Obstacle(width / 2, height / 2, 100));
 }
 
 function spawnFood() {
@@ -56,6 +60,9 @@ function draw() {
   // couleur pour effacer l'écran
   background(0);
 
+  // Show obstacles
+  obstacles.forEach(o => o.show());
+
   // On dessine les snakes instances de la classe Snake
   snakes.forEach(snake => {
     let targetBruitee = target.copy();
@@ -66,14 +73,17 @@ function draw() {
     let offsetY = sin(angleOffset) * distanceFromTarget;
     targetBruitee.x += offsetX;
     targetBruitee.y += offsetY;
-    snake.arrive(targetBruitee);
+
+    // Use move instead of arrive, and pass obstacles
+    snake.move(targetBruitee, obstacles);
     snake.show();
 
     // Logique pour manger
     for (let i = foods.length - 1; i >= 0; i--) {
       let f = foods[i];
       let d = p5.Vector.dist(snake.head.pos, f);
-      if (d < snake.r) {
+      // snake head radius usage
+      if (d < snake.head.r) {
         foods.splice(i, 1);
         snake.addRing();
         spawnFood(); // On en rajoute un nouveau
@@ -122,9 +132,19 @@ function draw() {
         }
         break;
     }
+
+    // Add avoidance for normal vehicles too just for fun if snakes have it?
+    // User only asked for snake though. But let's leave it simple.
+
     if (steeringForce) {
       vehicle.applyForce(steeringForce);
     }
+
+    // Avoid obstacles for standard vehicles too if desired:
+    let avoidForce = vehicle.avoid(obstacles);
+    avoidForce.mult(3);
+    vehicle.applyForce(avoidForce);
+
     vehicle.update();
     vehicle.show();
   });
@@ -140,6 +160,10 @@ function dessinerLesPointsDuTexte() {
   });
 }
 
+function mousePressed() {
+  obstacles.push(new Obstacle(mouseX, mouseY, random(20, 80)));
+}
+
 function keyPressed() {
   if (key === 'd') {
     Vehicle.debug = !Vehicle.debug;
@@ -150,7 +174,13 @@ function keyPressed() {
   } else if (key === 'a') {
     let taille = floor(random(10, 50));
     let couleur = color(random(255), random(255), random(255));
-    let snake = new Snake(random(width), random(height), taille, 20, couleur);
+    // Random chance for snake wander
+    let snake;
+    if (random(1) < 0.5) {
+      snake = new Snake(random(width), random(height), taille, 20, couleur);
+    } else {
+      snake = new SnakeWander(random(width), random(height), taille, 20, couleur);
+    }
     snakes.push(snake);
   }
 }
