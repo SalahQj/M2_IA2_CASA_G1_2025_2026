@@ -1,31 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html> <!-- Déclaration du document HTML5 -->
+<html lang="en"> <!-- Langue du document : Anglais -->
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head> <!-- En-tête du document -->
+  <meta charset="utf-8" /> <!-- Encodage UTF-8 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Responsive design -->
 
-  <title>Sketch</title>
+  <title>Sketch</title> <!-- Titre de l'onglet -->
 
-  <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="stylesheet" type="text/css" href="style.css"> <!-- Liaison vers le style CSS -->
 
-  <script src="libraries/p5.min.js"></script>
-  <script src="vehicle.js?v=3"></script>
-  <script src="obstacle.js?v=1"></script>
-  <script src="snake.js?v=3"></script>
-  <script src="snakewander.js?v=1"></script>
-  <script src="sketch.js?v=3"></script>
-  <script>
+  <script src="libraries/p5.min.js"></script> <!-- Chargement de p5.js -->
+  <script src="vehicle.js?v=3"></script> <!-- Chargement de la classe Vehicle -->
+  <script src="obstacle.js?v=1"></script> <!-- Chargement de la classe Obstacle -->
+  <script src="snake.js?v=3"></script> <!-- Chargement de la classe Snake -->
+  <script src="snakewander.js?v=1"></script> <!-- Chargement de la classe SnakeWander -->
+  <script src="sketch.js?v=3"></script> <!-- Chargement du script principal -->
+  <script> <!-- Script interne utilitaire -->
     // Fail-safe : Masquer l'écran de chargement après 3 secondes quoi qu'il arrive
-    setTimeout(() => {
-      let loading = document.getElementById('p5_loading');
-      if (loading) loading.style.display = 'none';
-    }, 3000);
-  </script>
-</head>
+    setTimeout(() => { // Démarre un minuteur
+      let loading = document.getElementById('p5_loading'); // Récupère le div de chargement
+      if (loading) loading.style.display = 'none'; // Si présent, on le cache
+    }, 3000); // 3000 ms = 3 secondes
+  </script> <!-- Fin script utilitaire -->
+</head> <!-- Fin en-tête -->
 
-<body>
-  <!-- Pas besoin de déclarer un canvas pour dessiner en P5.js -->
-</body>
+<body> <!-- Corps du document -->
+  <!-- Le canvas p5 sera généré automatiquement ici -->
+</body> <!-- Fin corps -->
 
-</html>
+</html> <!-- Fin HTML -->
